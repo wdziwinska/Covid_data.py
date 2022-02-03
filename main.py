@@ -63,3 +63,15 @@ def percentFullyVaccined(day = csvfile['date'].max(), location = None, continent
 
 print('\n\n3 Liczba osob pelnie zaszczepiona na 100 tys. mieszkancow oraz procentowa liczba osób pełnie zaszczepionych')
 print(percentFullyVaccined())
+
+#4. Informację o pięciu krajach z najwyższym wskaźnikiem restrykcji (stringency_index) na opcjonalnie podany dzień.
+def theHighestStringencyIndex(day: datetime = None) -> series:
+    if day is None and csvfile['stringency_index'] is not None:
+        stringencyIndex = csvfile.groupby('location').stringency_index.max().sort_values(ascending=False)
+        print(type(csvfile.groupby('location').stringency_index))
+    else:
+        stringencyIndex = csvfile[(csvfile['date']) == day].groupby('location').stringency_index.max().sort_values(ascending=False)
+
+    return stringencyIndex.head(5).to_string()
+print('\n\n4. Infomacje o pieciu krajach z najwyzszym wskaznikiem restrykcji na opcjonalnie podany dzien')
+print(theHighestStringencyIndex('2021.03.23'))
