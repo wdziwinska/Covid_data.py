@@ -20,3 +20,15 @@ def newCasesPerInhabitatWithTime(location, day1: datetime = None, day2: datetime
     return result
 print("\n1. Laczna liczba zgonow COVID w podabym kraju oraz laczna liczba przypadkow na jednego mieszkanca w podanym okresie czasu")
 print(newCasesPerInhabitatWithTime(location = 'Poland'))
+
+#2.Wyznaczyć wartości: Liczby osób zaszczepionych danego dnia oraz liczby osób zaszczepionych pełnie w podanym dniu
+def numberOfPeopleVaccined(day: datetime) -> (float, float):
+
+    newVaccinations = csvfile[(csvfile['date']) == day].new_vaccinations.sum(axis = 'index') #people_vaccinated
+    fullyVaccinated = csvfile[(csvfile['date']) == day].people_fully_vaccinated.sum(axis = 'index')
+
+    return newVaccinations, fullyVaccinated
+
+newVaccinations, fullyVaccinated = numberOfPeopleVaccined('2021-11-23')
+print('\n\n2.1. Liczba osob zaszczepionych w podanym dniu: ', newVaccinations)
+print('2.2. Liczba osob zaszczepionych pelnie w podanym dniu: ', fullyVaccinated)
