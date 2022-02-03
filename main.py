@@ -1,5 +1,6 @@
 import datetime
 import pandas as pd
+from sympy import series
 
 csvfile = pd.read_csv('owid-covid-data r.csv', sep=';', decimal = ',')
 csvfile['date'] = pd.to_datetime(csvfile['date'])
@@ -32,3 +33,33 @@ def numberOfPeopleVaccined(day: datetime) -> (float, float):
 newVaccinations, fullyVaccinated = numberOfPeopleVaccined('2021-11-23')
 print('\n\n2.1. Liczba osob zaszczepionych w podanym dniu: ', newVaccinations)
 print('2.2. Liczba osob zaszczepionych pelnie w podanym dniu: ', fullyVaccinated)
+
+#3. Liczbę osób pełnie zaszczepionych na 100 tys. mieszkańców oraz procentową liczbę osób pełnie zaszczepionych w podanym opcjonalnie kraju lub kontynencie oraz opcjonalnie według stanu na dany dzień.
+def percentFullyVaccined(day = csvfile['date'].max(), location = None, continent = None):
+
+    if location is None and continent is None:
+        pfv = csvfile[(csvfile['date']) <= day].groupby(['location']).people_fully_vaccinated.max()
+        fullyVaccinated = pd.Series(pfv.sum())
+        pop = csvfile[((csvfile['date']) <= day)].groupby(['location']).population.max()
+        population = pd.Series(pop.sum())
+
+    elif continent is None:
+        fullyVaccinated = csvfile[((csvfile['date']) <= day) & (csvfile['location'] == location)].groupby(['location']).people_fully_vaccinated.max()
+        population = csvfile[((csvfile['date']) <= day) & (csvfile['location'] == location)].groupby(['location']).population.max()
+
+    elif location is None:
+        fullyVaccinated = csvfile[((csvfile['date']) <= day) & (csvfile['continent'] == continent)].drop_duplicates(subset='location', keep = 'last').groupby(['continent']).people_fully_vaccinated.sum()
+        population = csvfile[((csvfile['date']) <= day) & (csvfile['continent'] == continent)].drop_duplicates(subset='location').groupby(['continent']).population.sum()
+
+    elif location is not None and continent is not None:
+        fullyVaccinated = csvfile[((csvfile['date']) <= day) & (csvfile['continent'] == continent) & (csvfile['location'] == location)].groupby(['continent', 'location']).people_fully_vaccinated.max()
+        population = csvfile[((csvfile['date']) <= day) & (csvfile['continent'] == continent) & (csvfile['location'] == location)].groupby(['continent', 'location']).population.max()
+
+    fullyVaccinatedPercent = (fullyVaccinated / population)*100
+    fullyVaccinatedPerThousand = fullyVaccinated / 100000
+
+    result = pd.concat([fullyVaccinatedPerThousand, fullyVaccinatedPercent], axis=1)
+    return result
+
+print('\n\n3 Liczba osob pelnie zaszczepiona na 100 tys. mieszkancow oraz procentowa liczba osób pełnie zaszczepionych')
+print(percentFullyVaccined())
